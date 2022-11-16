@@ -352,8 +352,7 @@ export class Plugin {
       'Alt': 'Alt',
     };
 
-    return keyCodes.map
-    ((codes) => String(codes).split('+').map((code) => {
+    return keyCodes.map((codes) => String(codes).split('+').map((code) => {
       if (code in specialCodes) {
         return specialCodes[code];
       }
@@ -362,7 +361,7 @@ export class Plugin {
         return String.fromCharCode(Number(code));
       }
       return code;
-    }).map((code) => `<code>${code}</code>`).join(' + ')).join(' | ');
+    }).map((code) => `<code>${code}</code>`).join(' + ')).join(' , ');
   }
 
   /**
@@ -379,14 +378,68 @@ export class Plugin {
     // TODO: make table
     // TODO: keycodes to readable cmds
     // TODO: searchbar
+    /**
+     *
+     */
 
-    // TODO: wew want to insert some HTML node for the table
-    for (const [key, value] of Blockly.ShortcutRegistry.registry.shortcuts) {
-      modalContent.innerHTML +=
-      `<p>${key} -> ${this.formatCodes(value.keyCodes)}</p>`;
+    /**
+     *
+     */
+    function filterSearch() {
+      console.log('works');
     }
 
-    // modalContent.appendChild(document.createElement(shortcuts));
+    modalContent.innerHTML +=
+    `<div class="searchBar">
+      <input id="search" type="text" placeholder="Type to search in keybindings" />
+    </div>`;
+
+    // const element = document.createElement('searchBar');
+    // element.innerHTML =
+    // `<div class="searchBar" id="search">
+    //   <input type="text" placeholder="Type to search in keybindings" />
+    // </div>`;
+    // element.children[0].addEventListener('onkeypress', filterSearch);
+
+    // modalContent.appendChild(element);
+
+
+    // const searchBar = document.getElementsByClassName('searchBar').input;
+    // console.log('SEARCHBAR INPUT', searchBar)
+
+
+    // TODO: update filter member and rerender shortcut modal every 100ms
+    document.addEventListener('keydown', (e) => {
+      const target = e.target;
+      if (target.id == 'search') {
+        // save off the text value;
+        console.log('Works!');
+      }
+    }, true);
+
+    // TODO: we want to insert some HTML node for the table
+    let table = '';
+
+    table +=
+    `<table>
+      <tr>
+        <th>Command</th>
+        <th>Keybinding</th>
+      </tr>`;
+    for (const [key, value] of Blockly.ShortcutRegistry.registry.shortcuts) {
+      table +=
+      `<tr>
+         <td>${key}</td>
+         <td>${this.formatCodes(value.keyCodes)}</td>
+       </tr>`;
+    }
+    table += `</table>`;
+
+    modalContent.innerHTML += table;
+
+    console.log(table);
+    console.log(modalContent.innerHTML);
+
     contentContainer.appendChild(modalContent);
   }
 
@@ -407,6 +460,21 @@ Blockly.Css.register(`
   left: 0px;
   top: 0px;
   position: fixed;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th, td {
+  text-align: left;
+  padding: 16px;
+}
+td + td, th + th { border-left:2px solid #ddd; }
+tr:nth-child(even) {
+  background-color: #f2f2f2;
 }
 .blocklyModalContainer {
   background-color: white;
@@ -456,5 +524,17 @@ code {
   background-color: lightGray;
   padding: 4px;
   border-radius: 5px;
+}
+.searchBar input[type=text] {
+  font-size: 17px;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
+  width: 100%;
+  padding: 6px;
+  margin-top: 8px;
+  margin-right: 16px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
 }
 `);
