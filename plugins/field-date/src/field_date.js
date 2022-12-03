@@ -10,23 +10,34 @@
  * @author pkendall64@gmail.com (Paul Kendall)
  */
 
-goog.provide('Blockly.FieldDate');
+import * as Blockly from 'blockly/core'
 
-goog.require('Blockly.Css');
-goog.require('Blockly.Events');
-goog.require('Blockly.Field');
-goog.require('Blockly.FieldTextInput');
-goog.require('Blockly.fieldRegistry');
-goog.require('Blockly.utils.dom');
-goog.require('Blockly.utils.object');
-goog.require('Blockly.utils.string');
+/**
+ * Ensures that the input value is a valid date.
+ * @param {*} newValue 
+ * @returns 
+ */
+function dateValidator(newValue) {
+  if (!newValue) {
+    return null;
+  }
+  if (!/^([0-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$)/.test(newValue)) {
+    return null;
+  }
 
-goog.require('goog.date');
-goog.require('goog.date.DateTime');
-goog.require('goog.events');
-goog.require('goog.i18n.DateTimeSymbols');
-goog.require('goog.i18n.DateTimeSymbols_he');
-goog.require('goog.ui.DatePicker');
+  return newValue;
+}
+
+/**
+ * Get current date
+ */
+function initialDateValue() {
+  let initialDate = new Date()
+  const offset = initialDate.getTimezoneOffset()
+
+  initialDate = new Date(initialDate.getTime() - (offset * 60 * 1000))
+  return initialDate.toISOString().split('T')[0];
+}
 
 /**
  * Class for a date input field.
@@ -45,6 +56,7 @@ class FieldDate extends Blockly.FieldTextInput {
    * @param {?(boolean|string)=} textEdit Whether to enable text editor.
    */
   constructor(value = undefined, validator = undefined, textEdit = false) {
+    const initial = dateValidator(value) || initialDateValue()
     super(value, validator);
 
     /**
@@ -65,6 +77,10 @@ class FieldDate extends Blockly.FieldTextInput {
   static fromJson(options) {
     return new FieldDate(options['date'], undefined, options['textEdit']);
   }
+
+  /**
+   * Create the time input
+   */
 
   /**
    * Loads the best language pack by scanning the Blockly.Msg object for a
@@ -100,6 +116,26 @@ class FieldDate extends Blockly.FieldTextInput {
       return null;
     }
     return newValue;
+  }
+
+  /**
+   * Create the date input editor widget.
+   * Override the default text input to be a date input
+   */
+  widgetCreate_() {
+    const div = Blockly.WidgetDiv.getDiv();
+    this.picker = super.widgetCreate_();
+    this.picker.style.cursor = 'pointer';
+    this.picker.setAttribute('type', 'date');
+    this.picker.style.opacity = '0';
+    this.picker.className = 'datePicker';
+
+    this.picker.addEventListener('click', (e) => {
+      this.picker.showPicker(e);
+    });
+
+    div.appendChild(this.picker);
+    return this.picker;
   }
 
   /**
